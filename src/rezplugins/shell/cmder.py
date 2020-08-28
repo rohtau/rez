@@ -1,5 +1,5 @@
 """
-Windows Command Prompt (DOS) shell.
+Windows Cmder Command Prompt shell.
 """
 from rez.config import config
 from rez.rex import RexExecutor, expandable, literal, OutputStyle, EscapedString
@@ -17,7 +17,7 @@ import subprocess
 basestring = six.string_types[0]
 
 
-class CMD(Shell):
+class CMDER(Shell):
     # For reference, the ss64 web page provides useful documentation on builtin
     # commands for the Windows Command Prompt (cmd).  It can be found here :
     # http://ss64.com/nt/cmd.html
@@ -34,7 +34,7 @@ class CMD(Shell):
 
     @classmethod
     def name(cls):
-        return 'cmd'
+        return 'cmder'
 
     @classmethod
     def file_extension(cls):
@@ -170,6 +170,7 @@ class CMD(Shell):
                     # that would leave spawn_shell hung on a blocked call
                     # waiting for the user to type "exit" into the shell that
                     # was spawned to run the rez context printout
+                    # ex.command("cmd /Q /C %ConEmuDir%\..\init.bat & rez context")
                     ex.command("cmd /Q /C rez context")
 
         def _create_ex():
@@ -211,17 +212,8 @@ class CMD(Shell):
         elif shell_command is None:
             # Launch the configured shell itself and wait for user interaction
             # to exit.
+            executor.command('cmd /Q /K %ConEmuDir%\..\init.bat ')
             # executor.command('cmd /Q /K')
-            # Cmder support
-            if config.use_cmder and 'ConEmuDir' in os.environ:
-                # print("Cmder use set")
-                executor.command('cmd /Q /K %ConEmuDir%\..\init.bat ')
-            elif config.use_cmder and not 'ConEmuDir' in os.environ:
-                print_warning("Seems that your terminal is not using cmder. Can't find ConEmuDir envvar")
-                executor.command('cmd /Q /K')
-            else:
-                executor.command('cmd /Q /K')
-
 
         # Exit the configured shell.
         executor.command('exit %errorlevel%')
@@ -247,14 +239,23 @@ class CMD(Shell):
         # passes '' and we do NOT want to keep a shell open during a rex code
         # exec operation.
         if shell_command is None:
+            print("DEBUG 3")
+            # cmd_flags = ['/Q', '/K \"call %ConEmuDir%\..\init.bat\"']
             cmd_flags = ['/Q', '/K']
         else:
+            print("DEBUG 4")
             cmd_flags = ['/Q', '/C']
 
-        cmd += [self.executable]
+        # cmd += [self.executable]
+        cmd += ['cmd.exe']
         cmd += cmd_flags
-        cmd += ['call {}'.format(target_file)]
+        # cmd += ['call {}'.format(target_file)]
+        cmd += ["call %ConEmuDir%\..\init.bat & " + 'call {}'.format(target_file)]
+        # cmd += ['call {}'.format(target_file) + "call %ConEmuDir%\..\init.bat & "]
         is_detached = (cmd[0] == 'START')
+
+        print("Shell command: %s"%cmd)
+
         p = Popen(cmd, env=env, shell=is_detached, **Popen_args)
         return p
 
@@ -364,7 +365,7 @@ class CMD(Shell):
 
 def register_plugin():
     if platform_.name == "windows":
-        return CMD
+        return CMDER
 
 
 # Copyright 2013-2016 Allan Johns.
