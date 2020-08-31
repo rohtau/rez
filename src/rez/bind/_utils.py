@@ -278,11 +278,8 @@ def get_install_path(install_path, pkgtype=None):
     if install_path == config.release_packages_path:
         if pkgtype is not None:
             if hasattr(config, 'release_packages_root') and config.release_packages_root:
-                print("Got root folder config")
                 if hasattr(config, 'release_packages_types') and len(config.release_packages_types) > 0:
-                    print("Got packages types")
                     if pkgtype in config.release_packages_types:
-                        print("Type in list") 
                         install_path = os.path.normpath(os.path.join(config.release_packages_root, pkgtype))
 
     return install_path
