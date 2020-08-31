@@ -85,12 +85,13 @@ def find_exe(name, filepath=None):
     return filepath
 
 
-def extract_version(exepath, version_arg, word_index=-1, version_rank=3):
+def extract_version(exepath, version_arg, line_index=0, word_index=-1, version_rank=3):
     """Run an executable and get the program version.
 
     Args:
         exepath: Filepath to executable.
         version_arg: Arg to pass to program, eg "-V". Can also be a list.
+        line_index: Expect the Nth line of output to contain the version.
         word_index: Expect the Nth word of output to be the version.
         version_rank: Cap the version to this many tokens.
 
@@ -106,7 +107,7 @@ def extract_version(exepath, version_arg, word_index=-1, version_rank=3):
         raise RezBindError("Failed to execute %s: %s\n(error code %d)"
                            % (exepath, stderr, returncode))
 
-    stdout = stdout.strip().split('\n')[0].strip()
+    stdout = stdout.strip().split('\n')[line_index].strip()
     log("Extracting version from output: '%s'" % stdout)
 
     try:
@@ -209,7 +210,7 @@ def get_app_folders_vers(appname, install_root='/opt', test_folder=None):
     baseappinstall = os.path.normpath(os.path.join(install_root, appname))
     if not os.path.exists(baseappinstall) or not os.path.isdir(baseappinstall):
         raise RezBindError(
-            "appname base install path doesn't exists or is not a directory: %s" % (appname, baseappinstall))
+            "%s base install path doesn't exists or is not a directory: %s" % (appname, baseappinstall))
     # Check if the passed path is already the app folder, so there are not folders with version, this is the actual folder for the app
     if test_folder is not None and test_folder(baseappinstall):
         return [baseappinstall]
