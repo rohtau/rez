@@ -11,12 +11,16 @@ def setup_parser(parser, completions=False):
     from rez.package_search import ResourceSearchResultFormatter
 
     type_choices = ("package", "family", "variant", "auto")
+    pkg_type_choices = ("app", "bundle", "int", "ext", "job", "shot", "all")
     format_choices = ", ".join(sorted(ResourceSearchResultFormatter.fields))
 
     parser.add_argument(
         "-t", "--type", default="auto", choices=type_choices,
         help="type of resource to search for. If 'auto', either packages or "
         "package families are searched, depending on the value of PKG")
+    parser.add_argument(
+        "--pt", "--pkg-type", default="all", choices=pkg_type_choices,
+        help="type of package to search for" )
     parser.add_argument(
         "--nl", "--no-local", dest="no_local", action="store_true",
         help="don't search local packages")
@@ -97,7 +101,8 @@ def command(opts, parser, extra_arg_groups=None):
         latest=opts.latest,
         after_time=after_time,
         before_time=before_time,
-        validate=(opts.validate or opts.errors)
+        validate=(opts.validate or opts.errors),
+        pkg_type=opts.pkg_type
     )
 
     resource_type, search_results = searcher.search(opts.PKG)

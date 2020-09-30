@@ -172,7 +172,8 @@ class ResourceSearcher(object):
     """Search for resources (packages, variants or package families).
     """
     def __init__(self, package_paths=None, resource_type=None, no_local=False,
-                 latest=False, after_time=None, before_time=None, validate=False):
+                 latest=False, after_time=None, before_time=None, validate=False,
+                 pkg_type=None):
         """Create resource search.
 
         Args:
@@ -189,6 +190,9 @@ class ResourceSearcher(object):
                 epoch time
             validate (bool): Validate each resource that is found. If False,
                 results are not validated (ie, `validation_error` is None).
+            pkg_type (str): type of package to look for. Look up packages based on the 
+                type attribute in the package description. Supported types:
+                app, bundle, int, ext, job, shot, all .
 
         Returns:
             List of `ResourceSearchResult` objects
@@ -199,6 +203,7 @@ class ResourceSearcher(object):
         self.after_time = after_time
         self.before_time = before_time
         self.validate = validate
+        self.pkg_type = pkg_type
 
         if package_paths:
             self.package_paths = package_paths
