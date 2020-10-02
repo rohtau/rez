@@ -226,6 +226,7 @@ class ResourceSearcher(object):
               in alphabetical order if families, and version ascending for
               packages or variants.
         """
+    
 
     def search(self, resources_request=None):
         """Search for resources.
@@ -247,7 +248,7 @@ class ResourceSearcher(object):
 
         family_names = set(
             x.name for x in iter_package_families(paths=self.package_paths)
-            if fnmatch.fnmatch(x.name, name_pattern)
+            if fnmatch.fnmatch(x.name, name_pattern) and self._validate_pkg_type(x, self.pkg_type)
         )
 
         family_names = sorted(family_names)
@@ -263,12 +264,17 @@ class ResourceSearcher(object):
         if not family_names:
             return resource_type, []
 
+        # What type of package to search for:
+        if self.pkg_type:
+            pkg_type = self.pkg_type
+
         # return list of family names (validation is n/a in this case)
         if resource_type == "family":
             results = [ResourceSearchResult(x, "family") for x in family_names]
             return "family", results
 
         results = []
+
 
         # iterate over packages/variants
         for name in family_names:
@@ -323,6 +329,22 @@ class ResourceSearcher(object):
                     continue
 
         return resource_type, results
+
+    @classmethod
+    def _validate_pkg_type(cls, resource, pkg_type):
+        """
+        Check if resource has a type attribute and then check if it
+        is the same as pkg_type.
+        If pkg_type is all ot resource doesn't have type attribute then
+        return True, otherwise perform the test.
+        """
+        if pkg_type == 'all':
+            return True
+        pkg = get_latest_package( resource.name)
+        if pkg is not None and hasattr( pkg, 'type'):
+            # print("Test package: %s, Type: %s"%(pkg.name, pkg.type))
+            return pkg.type == pkg_type
+        return True
 
     @classmethod
     def _parse_request(cls, resources_request):
