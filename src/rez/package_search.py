@@ -11,7 +11,8 @@ from collections import defaultdict
 import sys
 
 from rez.packages import iter_package_families, iter_packages, get_latest_package
-from rez.exceptions import PackageFamilyNotFoundError, ResourceContentError
+# from rez.exceptions import PackageFamilyNotFoundError, PackageDefinitionFileMissing, ResourceContentError, ResourceError
+from rez.exceptions import PackageFamilyNotFoundError, ResourceContentError, ResourceError
 from rez.util import ProgressBar
 from rez.utils.colorize import critical, info, error, Printer
 from rez.vendor.pygraph.classes.digraph import digraph
@@ -275,7 +276,6 @@ class ResourceSearcher(object):
 
         results = []
 
-
         # iterate over packages/variants
         for name in family_names:
             it = iter_packages(name, version_range, paths=self.package_paths)
@@ -340,11 +340,14 @@ class ResourceSearcher(object):
         """
         if pkg_type == 'all':
             return True
-        pkg = get_latest_package( resource.name)
-        if pkg is not None and hasattr( pkg, 'type'):
-            # print("Test package: %s, Type: %s"%(pkg.name, pkg.type))
-            return pkg.type == pkg_type
-        return True
+
+        try:
+            pkg = get_latest_package( resource.name)
+            if pkg is not None and hasattr( pkg, 'type'):
+                return pkg.type == pkg_type
+        except :
+            return False
+        return False
 
     @classmethod
     def _parse_request(cls, resources_request):
