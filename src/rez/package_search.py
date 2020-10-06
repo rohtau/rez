@@ -11,7 +11,8 @@ from collections import defaultdict
 import sys
 
 from rez.packages import iter_package_families, iter_packages, get_latest_package
-from rez.exceptions import PackageFamilyNotFoundError, ResourceContentError
+# from rez.exceptions import PackageFamilyNotFoundError, PackageDefinitionFileMissing, ResourceContentError, ResourceError
+from rez.exceptions import PackageFamilyNotFoundError, ResourceContentError, ResourceError
 from rez.util import ProgressBar
 from rez.utils.colorize import critical, info, error, Printer
 from rez.vendor.pygraph.classes.digraph import digraph
@@ -172,7 +173,8 @@ class ResourceSearcher(object):
     """Search for resources (packages, variants or package families).
     """
     def __init__(self, package_paths=None, resource_type=None, no_local=False,
-                 latest=False, after_time=None, before_time=None, validate=False):
+                 latest=False, after_time=None, before_time=None, validate=False,
+                 pkg_type=None):
         """Create resource search.
 
         Args:
@@ -189,6 +191,9 @@ class ResourceSearcher(object):
                 epoch time
             validate (bool): Validate each resource that is found. If False,
                 results are not validated (ie, `validation_error` is None).
+            pkg_type (str): type of package to look for. Look up packages based on the 
+                type attribute in the package description. Supported types:
+                app, bundle, int, ext, job, shot, all .
 
         Returns:
             List of `ResourceSearchResult` objects
@@ -199,6 +204,7 @@ class ResourceSearcher(object):
         self.after_time = after_time
         self.before_time = before_time
         self.validate = validate
+        self.pkg_type = pkg_type
 
         if package_paths:
             self.package_paths = package_paths
@@ -221,6 +227,7 @@ class ResourceSearcher(object):
               in alphabetical order if families, and version ascending for
               packages or variants.
         """
+    
 
     def search(self, resources_request=None):
         """Search for resources.
@@ -242,7 +249,7 @@ class ResourceSearcher(object):
 
         family_names = set(
             x.name for x in iter_package_families(paths=self.package_paths)
-            if fnmatch.fnmatch(x.name, name_pattern)
+            if fnmatch.fnmatch(x.name, name_pattern) and self._validate_pkg_type(x, self.pkg_type)
         )
 
         family_names = sorted(family_names)
@@ -250,13 +257,18 @@ class ResourceSearcher(object):
         # determine what type of resource we're searching for
         if self.resource_type:
             resource_type = self.resource_type
-        elif version_range or len(family_names) == 1:
+        # elif version_range or len(family_names) == 1:
+        elif version_range or self.latest:
             resource_type = "package"
         else:
             resource_type = "family"
 
         if not family_names:
             return resource_type, []
+
+        # What type of package to search for:
+        if self.pkg_type:
+            pkg_type = self.pkg_type
 
         # return list of family names (validation is n/a in this case)
         if resource_type == "family":
@@ -318,6 +330,25 @@ class ResourceSearcher(object):
                     continue
 
         return resource_type, results
+
+    @classmethod
+    def _validate_pkg_type(cls, resource, pkg_type):
+        """
+        Check if resource has a type attribute and then check if it
+        is the same as pkg_type.
+        If pkg_type is all ot resource doesn't have type attribute then
+        return True, otherwise perform the test.
+        """
+        if pkg_type == 'all':
+            return True
+
+        try:
+            pkg = get_latest_package( resource.name)
+            if pkg is not None and hasattr( pkg, 'type'):
+                return pkg.type == pkg_type
+        except :
+            return False
+        return False
 
     @classmethod
     def _parse_request(cls, resources_request):

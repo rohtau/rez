@@ -112,7 +112,10 @@ def command(opts, parser, extra_arg_groups=None):
         variants = []
 
         for name in names:
-            print_info("Binding %s into %s..." % (name, install_path))
+            if hasattr(config, 'release_packages_root') and len(config.release_packages_root) > 0:
+                print_info("Binding %s into %s..." % (name, config.release_packages_root))
+            else:
+                print_info("Binding %s into %s..." % (name, install_path))
             variants_ = bind_package(name,
                                      path=install_path,
                                      no_deps=True,

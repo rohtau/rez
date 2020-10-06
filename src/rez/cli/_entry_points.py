@@ -46,6 +46,8 @@ def check_production_install():
     path = os.path.dirname(sys.argv[0])
     filepath = os.path.join(path, ".rez_production_install")
 
+    # XXX: disable this, is very annoying and the pip install works for us
+    """
     if not os.path.exists(filepath):
         sys.stderr.write(
             "Pip-based rez installation detected. Please be aware that rez command "
@@ -53,6 +55,8 @@ def check_production_install():
             "https://github.com/nerdvegas/rez/wiki/Installation#why-not-pip-for-production "
             " for futher details.\n"
         )
+    """
+    pass
 
 
 ### Entry points
