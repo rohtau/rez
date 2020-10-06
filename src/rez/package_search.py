@@ -257,7 +257,8 @@ class ResourceSearcher(object):
         # determine what type of resource we're searching for
         if self.resource_type:
             resource_type = self.resource_type
-        elif version_range or len(family_names) == 1:
+        # elif version_range or len(family_names) == 1:
+        elif version_range or self.latest:
             resource_type = "package"
         else:
             resource_type = "family"
