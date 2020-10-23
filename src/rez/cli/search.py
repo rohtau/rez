@@ -11,7 +11,7 @@ def setup_parser(parser, completions=False):
     from rez.package_search import ResourceSearchResultFormatter
 
     type_choices = ("package", "family", "variant", "auto")
-    pkg_type_choices = ("app", "bundle", "int", "ext", "job", "show", "shot", "all")
+    pkg_type_choices = ("app", "bundle", "int", "ext", "job", "show", "shot", "asset", "all")
     format_choices = ", ".join(sorted(ResourceSearchResultFormatter.fields))
 
     parser.add_argument(
