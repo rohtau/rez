@@ -372,6 +372,7 @@ config_schema = Schema({
     "context_tmpdir":                               OptionalStr,
     "default_shell":                                OptionalStr,
     "terminal_emulator_command":                    OptionalStr,
+    "use_cmder":                                    Bool,
     "editor":                                       OptionalStr,
     "image_viewer":                                 OptionalStr,
     "difftool":                                     OptionalStr,

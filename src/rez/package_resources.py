@@ -6,7 +6,7 @@ from rez.utils.data_utils import cached_property, AttributeForwardMeta, \
     LazyAttributeMeta
 from rez.utils.filesystem import find_matching_symlink
 from rez.utils.formatting import PackageRequest
-from rez.exceptions import PackageMetadataError, ResourceError
+from rez.exceptions import PackageMetadataError, ResourceContentError, ResourceError
 from rez.config import config, Config, create_config
 from rez.vendor.version.version import Version
 from rez.vendor.schema.schema import Schema, SchemaError, Optional, Or, And, Use
@@ -485,6 +485,8 @@ class VariantResourceHelper(six.with_metaclass(_Metas, VariantResource)):
             return hashdir
         else:
             dirs = [x.safe_str() for x in self.variant_requires]
+            if len(dirs) == 0:
+                raise ResourceContentError("variants attribute empty in package definition. Review package.py or pkg.variants in bind module")
             subpath = os.path.join(*dirs)
             return subpath
 

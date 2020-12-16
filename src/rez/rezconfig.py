@@ -596,6 +596,9 @@ default_shell = ""
 # is enabled using rez-env's "detached" option). If None, it is detected.
 terminal_emulator_command = None
 
+# Enable cmder initialization on Windows cmd shells
+use_cmder = False
+
 # subprocess.Popen arguments to use in order to execute a shell in a new process
 # group (see ResolvedContext.execute_shell, 'start_new_session'). Dict of
 # (Popen argument, value).

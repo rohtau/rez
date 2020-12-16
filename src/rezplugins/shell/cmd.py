@@ -211,7 +211,17 @@ class CMD(Shell):
         elif shell_command is None:
             # Launch the configured shell itself and wait for user interaction
             # to exit.
-            executor.command('cmd /Q /K')
+            # executor.command('cmd /Q /K')
+            # Cmder support
+            if config.use_cmder and 'ConEmuDir' in os.environ:
+                # print("Cmder use set")
+                executor.command('cmd /Q /K %ConEmuDir%\..\init.bat ')
+            elif config.use_cmder and not 'ConEmuDir' in os.environ:
+                print_warning("Seems that your terminal is not using cmder. Can't find ConEmuDir envvar")
+                executor.command('cmd /Q /K')
+            else:
+                executor.command('cmd /Q /K')
+
 
         # Exit the configured shell.
         executor.command('exit %errorlevel%')
@@ -245,7 +255,6 @@ class CMD(Shell):
         cmd += cmd_flags
         cmd += ['call {}'.format(target_file)]
         is_detached = (cmd[0] == 'START')
-
         p = Popen(cmd, env=env, shell=is_detached, **Popen_args)
         return p
 

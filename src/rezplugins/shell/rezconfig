@@ -24,3 +24,7 @@ powershell:
 pwsh:
     prompt: '> $ '
     additional_pathext: ['.PY']
+
+cmder:
+    prompt: '$G'
+    additional_pathext: ['.PY']
