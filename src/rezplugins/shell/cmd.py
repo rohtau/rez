@@ -7,6 +7,7 @@ from rez.shells import Shell
 from rez.system import system
 from rez.utils.execution import Popen
 from rez.utils.platform_ import platform_
+from rez.utils.logging_ import print_warning
 from rez.vendor.six import six
 from functools import partial
 import os
@@ -215,7 +216,8 @@ class CMD(Shell):
             # Cmder support
             if config.use_cmder and 'ConEmuDir' in os.environ:
                 # print("Cmder use set")
-                executor.command('cmd /Q /K %ConEmuDir%\..\init.bat ')
+                # os.environ['CMDER_CONFIGURED']='0'
+                executor.command('cmd /Q /K %ConEmuDir%\..\init.bat')
             elif config.use_cmder and not 'ConEmuDir' in os.environ:
                 print_warning("Seems that your terminal is not using cmder. Can't find ConEmuDir envvar")
                 executor.command('cmd /Q /K')
