@@ -12,13 +12,14 @@ from __future__ import print_function
 from rez.config import config
 from rez.packages import iter_packages
 from rez.package_repository import package_repo_stats
-from rez.utils.logging_ import print_debug
+from rez.utils.logging_ import print_debug, print_warning
 from rez.utils.data_utils import cached_property
 from rez.vendor.pygraph.classes.digraph import digraph
 from rez.vendor.pygraph.algorithms.cycles import find_cycle
 from rez.vendor.pygraph.algorithms.accessibility import accessibility
 from rez.exceptions import PackageNotFoundError, ResolveError, \
-    PackageFamilyNotFoundError, RezSystemError
+    PackageFamilyNotFoundError, RezSystemError, \
+    ResourceError
 from rez.vendor.version.version import Version, VersionRange
 from rez.vendor.version.requirement import VersionedObject, Requirement, \
     RequirementList
@@ -495,9 +496,13 @@ class _PackageVariantList(_Common):
                 self.solver.package_load_callback(package)
 
             variants_ = []
-            for var in package.iter_variants():
-                variant = PackageVariant(var, self.solver.building)
-                variants_.append(variant)
+            try:
+                for var in package.iter_variants():
+                    variant = PackageVariant(var, self.solver.building)
+                    variants_.append(variant)
+            except ResourceError as e:
+                print_warning("Can't get package %s version %s  variants. Error processing package:\n%s\nVersion %s will be DISCARDED"%(package.name, package.version, str(e), package.version))
+                continue
 
             entry[1] = variants_
             entry_ = _PackageEntry(package, variants_, self.solver)

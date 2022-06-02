@@ -241,6 +241,7 @@ def _load_py(stream, filepath=None):
         stack = ''.join(traceback.format_list(frames)).strip()
         if stack:
             msg += ":\n" + stack
+        # traceback.print_stack()
         raise ResourceError(msg)
 
     result = {}
