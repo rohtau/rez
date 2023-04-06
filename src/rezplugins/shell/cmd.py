@@ -7,7 +7,7 @@ from rez.shells import Shell
 from rez.system import system
 from rez.utils.execution import Popen
 from rez.utils.platform_ import platform_
-from rez.utils.logging_ import print_warning
+from rez.utils.logging_ import print_warning, print_info
 from rez.vendor.six import six
 from functools import partial
 import os
@@ -213,16 +213,37 @@ class CMD(Shell):
             # Launch the configured shell itself and wait for user interaction
             # to exit.
             # executor.command('cmd /Q /K')
-            # Cmder support
+            # Cmder and Clink support
             if config.use_cmder and 'ConEmuDir' in os.environ:
+                # Cmder
                 # print("Cmder use set")
                 # os.environ['CMDER_CONFIGURED']='0'
                 executor.command('cmd /Q /K %ConEmuDir%\..\init.bat')
+            elif config.use_clink and 'clink_dummy_capture_env' in os.environ:
+                # Clink
+                # For clink at the moment we just check for the existance of  th clink_dummy_capture_env envvar
+                #print_info("Seems that your terminal is Clink")
+                # Assume all is installed using scoop
+                if "SCOOP_GLOBAL" not in os.environ:
+                    print_warning("Can't find SCOOP_GLOBAL envvar, stop using clink and fallback to regular command prompt")
+                    executor.command('cmd /Q /K')
+                else:
+                    install_loc = os.getenv('SCOOP_GLOBAL')
+                    injectcmd = "\"%SCOOP_GLOBAL%\\apps\\clink\\current\\clink_x64.exe inject\""
+                    executor.command("cmd /Q /K %s"%injectcmd)
+            elif config.use_cmder or config.use_clink:
+                print_warning("Seems that your terminal is not using cmder or clink. Can't find ConEmuDir or clink_dummy_capture_env envvars.")
+                print_warning("Fallback to regular terminal")
+                executor.command('cmd /Q /K')
+            else:
+                executor.command('cmd /Q /K')
+            '''
             elif config.use_cmder and not 'ConEmuDir' in os.environ:
                 print_warning("Seems that your terminal is not using cmder. Can't find ConEmuDir envvar")
                 executor.command('cmd /Q /K')
             else:
                 executor.command('cmd /Q /K')
+            '''
 
 
         # Exit the configured shell.
