@@ -1,6 +1,6 @@
 # Update this value to version up Rez. Do not place anything else in this file.
 #_rez_version = "2.63.0 / rohtau 0.3.4"
-_rez_version = "2.63.0"
+_rez_version = "2.63.0a"
 
 
 # Copyright 2013-2016 Allan Johns.

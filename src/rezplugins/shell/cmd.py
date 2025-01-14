@@ -7,7 +7,7 @@ from rez.shells import Shell
 from rez.system import system
 from rez.utils.execution import Popen
 from rez.utils.platform_ import platform_
-from rez.utils.logging_ import print_warning, print_info
+from rez.utils.logging_ import print_warning, print_info, print_error
 from rez.vendor.six import six
 from functools import partial
 import os
@@ -214,23 +214,48 @@ class CMD(Shell):
             # to exit.
             # executor.command('cmd /Q /K')
             # Cmder and Clink support
+            from shutil import which
+            term = ""
             if config.use_cmder and 'ConEmuDir' in os.environ:
                 # Cmder
                 # print("Cmder use set")
                 # os.environ['CMDER_CONFIGURED']='0'
+                term = 'cmd'
                 executor.command('cmd /Q /K %ConEmuDir%\..\init.bat')
-            elif config.use_clink and 'clink_dummy_capture_env' in os.environ:
+            # elif config.use_clink and 'clink_dummy_capture_env' in os.environ:
+            # XXX: clink_dummy_capture_env has been removed in clink 1.7.2, need to use an alternative to detect
+            # a clink ready terminal
+            elif config.use_clink and which('clink'):
                 # Clink
-                # For clink at the moment we just check for the existance of  th clink_dummy_capture_env envvar
-                #print_info("Seems that your terminal is Clink")
-                # Assume all is installed using scoop
-                if "SCOOP_GLOBAL" not in os.environ:
-                    print_warning("Can't find SCOOP_GLOBAL envvar, stop using clink and fallback to regular command prompt")
-                    executor.command('cmd /Q /K')
+                # DEPRECATED: For clink at the moment we just check for the existance of  th clink_dummy_capture_env envvar
+                # XXX: our current method to detect if the current erminal is running clink is to run clinm info and in the output
+                # check if the string 'injected' exists. If clink is injected the output if clink info should contain a line like:
+                # injected : clink_dll_x64.dll
+                try:
+                    clink_cmd = which('clink')
+                    res = subprocess.run([clink_cmd, 'info'], stdout=subprocess.PIPE)
+                except Exception as e:
+                    # assume any exception means clink is not available in the system
+                    print_error("Error running clink info")
+                    pass
                 else:
-                    install_loc = os.getenv('SCOOP_GLOBAL')
-                    injectcmd = "\"%SCOOP_GLOBAL%\\apps\\clink\\current\\clink_x64.exe inject\""
-                    executor.command("cmd /Q /K %s"%injectcmd)
+                    # All good process output from clinm info command
+                    pass
+                    # print_info("Output from clink")
+                    # print_info(res.stdout)
+                    has_injection = 'injected' in str(res.stdout)
+                    # print_info(f"Has injection: {has_injection}" )
+                    if 'injected' in str(res.stdout):
+                        # Terminal has clink injected
+                        term = 'clink'
+                        # Assume all is installed using scoop
+                        if "SCOOP_GLOBAL" not in os.environ:
+                            print_warning("Can't find SCOOP_GLOBAL envvar, stop using clink and fallback to regular command prompt")
+                            executor.command('cmd /Q /K')
+                        else:
+                            install_loc = os.getenv('SCOOP_GLOBAL')
+                            injectcmd = "\"%SCOOP_GLOBAL%\\apps\\clink\\current\\clink_x64.exe inject\""
+                            executor.command("cmd /Q /K %s"%injectcmd)
             elif config.use_cmder or config.use_clink:
                 print_warning("Seems that your terminal is not using cmder or clink. Can't find ConEmuDir or clink_dummy_capture_env envvars.")
                 print_warning("Fallback to regular terminal")
@@ -244,6 +269,7 @@ class CMD(Shell):
             else:
                 executor.command('cmd /Q /K')
             '''
+            print_info(f"Terminal resolved as: {term}")
 
 
         # Exit the configured shell.
