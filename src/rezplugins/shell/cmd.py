@@ -216,11 +216,11 @@ class CMD(Shell):
             # Cmder and Clink support
             from shutil import which
             term = ""
+            # print_info(f"Where is clink? {which('clink')}")
             if config.use_cmder and 'ConEmuDir' in os.environ:
                 # Cmder
-                # print("Cmder use set")
-                # os.environ['CMDER_CONFIGURED']='0'
-                term = 'cmd'
+                # ConEmuDir is an envar setup during cmder install
+                term = 'cmder'
                 executor.command('cmd /Q /K %ConEmuDir%\..\init.bat')
             # elif config.use_clink and 'clink_dummy_capture_env' in os.environ:
             # XXX: clink_dummy_capture_env has been removed in clink 1.7.2, need to use an alternative to detect
@@ -239,8 +239,7 @@ class CMD(Shell):
                     print_error("Error running clink info")
                     pass
                 else:
-                    # All good process output from clinm info command
-                    pass
+                    # All good process output from clink info command
                     # print_info("Output from clink")
                     # print_info(res.stdout)
                     has_injection = 'injected' in str(res.stdout)
