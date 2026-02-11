@@ -6,7 +6,7 @@
 from __future__ import print_function
 
 from bisect import bisect_left, bisect_right, insort
-from collections import Sequence, MutableSequence
+from collections.abc import Sequence, MutableSequence
 from functools import wraps
 from itertools import chain, repeat, starmap
 from math import log as log_e
