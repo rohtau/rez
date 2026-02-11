@@ -6,6 +6,7 @@ tags*
 pip
 desktop.ini
 .vscode
+.tdvim
 *.pyc
 .project
 .pydevproject
