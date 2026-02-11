@@ -14,7 +14,7 @@ set _rezversion=%1
 IF "%~1" == "" (
     echo Please specify the version name to install
     echo This version:
-    tail -n 1 %CD%\_version.py
+    head -n 3 %CD%\src\rez\utils\_version.py | tail -n1
     exit /b 1
 )
 echo Install Rez %_rt_version% in C:\studio\tools\rez\%_rezversion%
